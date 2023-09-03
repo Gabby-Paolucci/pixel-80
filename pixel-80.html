@@ -1,0 +1,1273 @@
+<html>
+	<!--
+	PIXEL-80
+	by Gabby J Paolucci
+	Sprite editor for the TIC-80
+	https://github.com/Gabby-Paolucci/pixel-80	
+	-->
+	<head>
+		<title>TIC-80 Sprite Editor</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+		<style type="text/less">
+			/* How to Create a Responsive Square with CSS
+				https://spin.atomicobject.com/2015/07/14/css-responsive-square/ */
+			.square{
+				position: relative;
+				width: 100%;
+				border: solid 1px;
+			}
+			.square:after{
+				content: "";
+				display: block;
+				padding-bottom: 100%;
+			}
+			.content{
+				position: absolute;
+				width: 100%;
+				height: 100%;
+			}
+			/* Custom Styling */
+			canvas{
+				image-rendering: optimizeSpeed;
+				image-rendering: -moz-crisp-edges;
+				image-rendering: -webkit-optimize-contrast;
+				image-rendering: optimize-contrast;
+				image-rendering: pixelated;
+				-ms-interpolation-mode: nearest-neighbor;
+			}
+			h1{
+				margin-bottom: 0.25em;
+			}
+			form{
+				margin: 0;
+			}
+			table, tr, td{
+				border: solid 1px;
+				border-collapse: collapse;
+			}
+			td{
+				width: 1em;
+				height: 1em;
+				text-align: center;
+			}
+			table{
+				margin-bottom: 0.5em;
+			}
+			table#p{
+				float: left;
+				tbody{
+					td div{
+						margin: 1px;
+					}
+					td.selected1 div{
+						margin: 0;
+						border: dashed 1px;
+					}
+					td.selected2 div{
+						margin: 0;
+						border: dotted 1px;
+					}
+				}
+			}
+			#s{
+				td{
+					opacity: 1;
+				}
+				&.underlay-visible td{
+					opacity: 0.5;
+				}
+			}
+			#editor-underlay{
+				margin: 1px;
+				z-index: -1;
+			}
+			#underlay-background{
+				z-index: -2;
+				background: black;
+			}
+			label{
+				display: block;
+			}
+			input{
+				&[type=text]{
+					display: block;
+				}
+				&[type=file]{
+					display: block;
+					width: 100%;
+				}
+				&:invalid{
+					box-shadow: 0 0 5px 1px red;
+				}
+			}
+			button .fa{
+				margin-right: 0.25em;
+			}
+			fieldset{
+				margin-bottom: 0.5em;
+				fieldset{
+					border: solid 1px lightgrey;
+					margin: 0;
+					padding: 0.25em;
+					margin-bottom: 0.5em;
+				}
+				legend{
+					transition: background-color 0.25s ease-in;
+					&.highlight{
+						background-color: lightgrey;
+					}
+				}
+				&.closed{
+					padding-top: 0;
+					padding-bottom: 0.5em;
+					.fieldset-content	{
+						display: none;
+					}
+				}
+			}
+			#editor{
+				overflow: hidden;
+				fieldset{
+					padding-top: 0;
+					margin: 0;
+					table{
+						margin: 0;
+					}
+				}
+			}
+			label.color{
+				height: 2.25em;
+				width: 2.25em;
+				margin: 0.25em;
+				float: left;
+				display: block;
+				text-align: center;
+			}
+			#color-1, #color-2{
+				input{
+					width: 50%;
+					height: 50%;
+					display: inline-block;
+					margin: 0;
+					margin-top: 25%;
+				}
+			}
+			#color-1{
+				border: 4px dashed;
+			}
+			#color-2{
+				border: 4px dotted;
+			}
+			#tool{
+				clear: both;
+			}
+			label.tool,label.part{
+				display: inline-block;
+				border: 1px solid;
+				padding: 0.25em;
+			}
+			#action button{
+				padding: 0.5em;
+				margin-right: 0.5em;
+			}
+			#action button .fa, #animation-section button .fa{
+				margin-right: 0;
+			}
+			#tiles, #sprites, #panel{
+				border: 1px solid;
+				width:100%;
+				height:100%;
+			}
+			nav ul{
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				li{
+					float: left;
+					margin-left:1em;
+					a{
+						display: block;
+						text-decoration: none;
+					}
+					&::marker{
+						content: '\1405';
+					}
+				}
+			}
+			#pageNo label{
+				display: inline-block;
+				border: 1px solid;
+				padding: 0.25em;
+			}
+			#size, #number{
+				display: inline-block;
+				width: 3em;
+			}
+			#string{
+				width: 8em;
+				display: inline-block;
+			}
+			#overlay{
+				opacity: 0.75;
+				margin: 1px;
+			}
+			.fa-stack.small{
+				font-size: 0.5em; width: 2em;
+			}
+			/*.fa-stack.small i{ vertical-align: middle;}*/
+			#animation-section{
+				i{
+					vertical-align: middle;
+				}
+				button{
+					width: 2em;
+					height: 2em;
+					margin-right: 0.5em;
+					margin-top: 0.5em;
+				}
+			}
+			#import{
+				width: 100%;
+				height: 10em;
+			}
+			#noInPage label{
+				display: inline-block;
+			}
+			#underlay-section{
+				input[type=file]{
+					margin-bottom: 0.5em;
+				}
+				input[type=number]{
+					display: inline-block;
+					width: 3em;
+				}
+				button .fa{
+					margin: 0;
+				}
+			}
+			#placement{
+				label{
+					display: inline-block;
+				}
+			}
+			#filename{
+				display: inline-block;
+			}
+			#underlayX,#underlayY,#underlayWidth,#underlayHeight,#underlayZoom{
+				float: left;
+			}
+			#underlayZoom,#underlayWidth,#underlayHeight{
+				input[type=number]{
+				width: 2.5em;
+				}
+			}
+			#underlayZoom{
+				clear: both;
+			}
+		</style>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.3/less.min.js" integrity="sha512-6gUGqd/zBCrEKbJqPI7iINc61jlOfH5A+SluY15IkNO1o4qP1DEYjQBewTB4l0U4ihXZdupg8Mb77VxqE+37dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<script>
+			'use strict';
+			let clearCanvas=ctx =>{ ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height); ctx.beginPath();};
+			// invert hex color javascript Code Example
+			// https://www.codegrepper.com/code-examples/javascript/frameworks/nextjs/invert+hex+color+javascript
+			function invertColor(bg){
+				bg=parseInt(Number(bg.replace('#','0x')),10)
+				bg=~bg
+				bg=bg>>>0
+				bg=bg&0x00ffffff
+				bg='#' + bg.toString(16).padStart(6,"0")
+				return bg
+			}
+			// javascript - Programmatically Lighten or Darken a hex color (or rgb,and blend colors) - Stack Overflow
+			// https://stackoverflow.com/questions/5560248/programmatically-lighten-or-darken-a-hex-color-or-rgb-and-blend-colors
+			function LightenDarkenColor(col){
+				if (colorIsDark(col)){
+					let amt=50;
+					col=parseInt(col.replace('#',''),16);
+					return '#' + (((col & 0x0000FF) + amt) | ((((col >> 8) & 0x00FF) + amt) << 8) | (((col >> 16) + amt) << 16)).toString(16);
+				}
+			}
+
+			function hexToRgb(c){
+				// Convert hex to RGB: http://gist.github.com/983661
+				c=+("0x" + c.slice(1).replace(c.length<5 && /./g,'$&$&'));
+				return{r: c>>16,g: c>>8&255,b: c&255};
+			}
+			function colorIsDark(color){
+				let rgb=hexToRgb(color);
+				// HSP (Highly Sensitive Poo) equation from http://alienryderflex.com/hsp.html
+				let hsp=Math.sqrt(0.299*(rgb.r**2) + 0.587*(rgb.g**2) + 0.114*(rgb.b**2));
+				// Using the HSP value, determine whether the color is light or dark
+				return hsp<=127.5;
+			}
+			class SpriteClass{
+				Pixels;
+				Size=8;
+				Meta='00';
+				ImageData=null;
+				constructor(s,b,imageData){
+					if (typeof s==='number'){
+						this.Size=s;
+						let bdiff=(b) ?{ l: b.Pixels[0].length,d: this.Size-b.Pixels[0].length} :{ d: null};
+						// Only modify the array if no backup or the size is changing
+						if (bdiff.d!=0){
+							let blankLine=s => new Array(s).fill(0);
+							this.Pixels=[];
+							for (let i=0; i<this.Size; i++){
+								// b is longer so add a slice
+								if (bdiff.d<0){
+									this.Pixels.push(b.Pixels[i].slice(0,this.Size));
+								// b is shorter and this line exists in b so add with padding
+								} else if (bdiff.d>0 && i<bdiff.l){
+									this.Pixels.push(b.Pixels[i].concat(blankLine(bdiff.d)));
+								// Otherwise add full new line
+								} else{
+									this.Pixels.push(blankLine(this.Size));
+								}
+							}
+						} else{
+							this.Pixels=b.Pixels.map(l => l.slice());
+						}
+						let metaSize=this.GetMetaSize();
+						if (bdiff.d != null){
+							let d=metaSize-b.GetMetaSize();
+							// backup is longer
+							if (d<0){ this.Meta=b.Meta.slice(0,metaSize);}
+							// backup is shorter
+							else if (d>0){	this.Meta=b.Meta.padEnd(metaSize,0);}
+							else{ this.Meta=b.Meta;}
+						} else{
+							this.Meta='0'.repeat(metaSize);
+						}
+					} else if (typeof s==='string' || s instanceof String){
+						this.Size=8;
+						let l=s.length;
+						// Size to len 8=66,16=264,32=1056,64=4224
+						for (let i=8; i<=64; i*=2){
+							if (l==(i**2)+((i**2)/32)){
+								this.Size=i;
+								break;
+							}
+						}
+						this.Pixels=new Array(this.size);
+						let j=0;
+						for (let i=0; i<this.Size; i++){
+							this.Pixels[i]=s.substring(j,j+this.Size).split('');
+							j += this.Size;
+						}
+						this.Meta=s.substring(j);
+					}
+					if (typeof imageData !=='undefined'){
+						this.ImageData=imageData;
+					}
+				}
+				GetPixelInt(x,y){ return parseInt(this.Pixels[y][x],16);}
+				GetString(){ return this.Pixels.flat().join('');}
+				GetFullString(){ return this.GetString()+this.Meta;}
+				GetMetaSize(){ return (this.Size**2)/32;}
+				GetColumn(x){ return this.Pixels.map(l => l[x]);}
+				FlipHorizontal(){ this.Pixels.forEach(l => l.reverse());}
+				FlipVertical(){ this.Pixels.reverse();}
+				MirrorHorizontal(){ this.Pixels=this.Pixels.map((l) => l.slice(0,this.Size/2).concat(l.slice(0,this.Size/2).reverse()));}
+				MirrorVertical(){ this.Pixels=this.Pixels.slice(0,this.Size/2).concat(this.Pixels.slice(0,this.Size/2).map(l => [...l]).reverse());}
+				RotateLeft(){
+					let lines=[];
+					for (let i=this.Size-1; i>=0; i--){ lines.push(this.GetColumn(i));}
+					this.Pixels=lines;
+				}
+				RotateRight(){
+					let lines=[];
+					for (let i=0; i<this.Size; i++){ lines.push(this.GetColumn(i).reverse());}
+					this.Pixels=lines;
+				}
+				Fill(y,x){
+					// Flood fill in JavaScript – Recursion or no recursion?
+					// https://codeguppy.com/blog/flood-fill/index.html
+					let fillColor=Editor.ActiveHex(),
+							colorToReplace=this.Pixels[y][x],
+							stack=[];
+
+					stack.push([y,x]);
+
+					while(stack.length>0){
+						let [y,x]=stack.pop();
+
+						if (y<0 || x<0 || y>=this.Size || x>=this.Size || this.Pixels[y][x]==fillColor || this.Pixels[y][x]!=colorToReplace){
+							continue;
+						}
+
+						this.Pixels[y][x]=fillColor;
+
+						stack.push([y+1,x]);
+						stack.push([y-1,x]);
+						stack.push([y,x+1]);
+						stack.push([y,x-1]);
+					}
+				}
+				GetBinaryFlagsString(){ return ('00000000'+parseInt(this.Meta.substr(1,1)+this.Meta.substr(0,1),16).toString(2)).slice(-8);}
+				GetBinaryFlags(){ return this.GetBinaryFlagsString().split('').reverse().map(i => !!parseInt(i));}
+				ToEights(){
+					if (Sprite.Size==8){ return this;}
+					let	sprites=[],i=0;
+					for (let y=0; y<=Sprite.Size-8; y+=8){
+						let row=[];
+						for (let x=0; x<=Sprite.Size-8; x+=8){
+							let s=new SpriteClass(8);
+							s.Pixels=this.Pixels.slice(y,y+8).map(l => l.slice(x,x+8));
+							s.Meta=this.Meta.substr(i*2,2);
+							row.push(s);
+							i++;
+						}
+						sprites.push(row);
+					}
+					return sprites;
+				}
+				static ToOne(a){
+					if (typeof a.Size !=='undefined'){ return a;}
+					if (typeof a.length===1){ return a[0];}
+					let sprite=new SpriteClass(a.length*8);
+					sprite.Meta='';
+					for (let y=0; y<a.length; y++){
+						for (let x=0; x<a[y].length; x++){
+							sprite.Meta+=	a[y][x].Meta;
+						}
+					}
+					for (let y=0; y<sprite.Size; y++){
+						for (let x=0; x<sprite.Size; x++){
+							let ay=(Math.floor(y/8)),ax=(Math.floor(x/8));
+							sprite.Pixels[y][x]=a[ay][ax].Pixels[y%8][x%8];
+						}
+					}
+					return sprite;
+				}
+			}
+			class EditorClass{
+				UnderlayCtx=null;
+				// Default SWEETIE 16 palette
+				Colors=['#1a1c2c','#5d275d','#b13e53','#ef7d57','#ffcd75','#a7f070','#38b764','#257179','#29366f','#3b5dc9','#41a6f6','#73eff7','#f4f4f4','#94b0c2','#566c86','#333c57'];
+				ColorsRgb=[];
+				CurrentColors=[1,0];
+				CurrentColor=0;
+				Mode=0;
+				LastMode=0;
+				Modes={
+					Draw: 0,
+					Dropper: 1,
+					Fill: 2
+				};
+				Underlay={
+					props: ['x','y','zx','zy','zz'],
+					setProps: function(){ return this.props.filter((e,i)=>i<this.props.length-1);},
+					defaults: [0,0,100,100],
+					x: 0,y: 0,zx: 100,zy: 100,
+					get zz(){return this.zx==this.zy ? this.zx : null;},
+					set zz(v){this.zx=v;this.zy=v;},
+					controls:{},
+					refresh: function(){ $('#editor-underlay').css({left:this.x,top:this.y,width: `${this.zx}%`,height: `${this.zy}%`});},
+					getValues: function(){
+						let	u=this,
+								values=this.setProps().map(p=>u[p]);
+						return values.some((e,i)=>e!=u.defaults[i]) ? values.join(';') : null;
+					},
+					setValues: function(r){
+						let values=r.split(';');
+						for (let i=0; i<this.props.length-1 && i<values.length; i++)
+						{
+							let v=parseInt(values[i]);
+							if (!isNaN(v)){ this[this.props[i]]=v;}
+						}
+					},
+					setGui: function(){
+						for (let i=0; i<this.props.length; i++)
+						{
+							this.controls[this.props[i]].val(this[this.props[i]]);
+						}
+					}
+				};
+				constructor(){
+					this.ColorsToRgb();
+				}
+				ColorsToRgb(){
+					this.ColorsRgb=this.Colors.map(c => [parseInt(c.substr(1,2),16),parseInt(c.substr(3,2),16),parseInt(c.substr(5,2),16)]);
+				}
+				ActiveIndex(){ return this.CurrentColors[this.CurrentColor];}
+				ActiveHex(){ return this.ActiveIndex().toString(16);}
+				SetColor(c){
+					this.CurrentColors[this.CurrentColor]=c;
+					this.RefreshPalette();
+				}
+				ToggleActiveColor(){ this.CurrentColor=this.CurrentColor==0 ? 1 : 0;}
+				GetPaletteString(){ return this.Colors.join('').replace(/#/g,'');}
+				Create(){
+					let	t=this,table=$('table#s tbody');
+					table.empty();
+					for (let i=0; i<Sprite.Size; i++){
+						let tr=$('<tr></tr>');
+						table.append(tr);
+						for (let j=0; j<Sprite.Size; j++){
+							let td=$('<td>&nbsp;</td>')
+								.data({x: j,y: i})
+								.click(e =>{
+								let	d=$(e.target).data();
+								switch (t.Mode){
+									case t.Modes.Draw:
+										let backupColor=t.CurrentColor;
+										if (Sprite.Pixels[d.y][d.x]==t.ActiveHex()){ t.ToggleActiveColor();}
+										Sprite.Pixels[d.y][d.x]=t.ActiveHex();
+										t.Refresh();
+										t.CurrentColor=backupColor;
+										break;
+									case t.Modes.Dropper:
+										Editor.SetColor(Sprite.GetPixelInt(d.x,d.y));
+										t.Mode=t.LastMode;
+										t.RefreshTool();
+										break;
+									case t.Modes.Fill:
+										Sprite.Fill(d.y,d.x);
+										t.Refresh();
+										break;
+								}
+							});
+							tr.append(td);
+						}
+					}
+					t.Refresh();
+				}
+				Refresh(){
+					let trs=$('table#s tbody').find('tr');
+					for (let i=0; i<Sprite.Size; i++){
+						let tds=trs.eq(i).find('td');
+						for (let j=0; j<Sprite.Size; j++)	{
+							tds.eq(j).css('background-color',this.Colors[Sprite.GetPixelInt(j,i)]);
+						}
+					}
+				}
+				CreatePalette(){
+					let	table=$('table#p tbody'),c=0,t=this;
+					table.empty();
+					for (let i=0; i<2; i++){
+						let tr=$('<tr></tr>');
+						table.append(tr);
+						for (let j=0; j<8; j++){
+							let div=$(`<div>${(new String(c)).padStart(2,'0')}</div>`)
+								.css('color',LightenDarkenColor(invertColor(t.Colors[c])));
+							let td=$('<td></td>')
+								.append(div).css('background-color',t.Colors[c])
+								.click(function (){ t.SetColor($(this).data('c'));})
+								.data({c: c});
+							tr.append(td);
+							c++;
+						}
+					}
+				}
+				RefreshPalette(){
+					for (let i=1; i<3; i++){
+						$(`table#p tbody td.selected${i}`).removeClass(`selected${i}`);
+						$('table#p tbody td').eq(this.CurrentColors[i-1]).addClass(`selected${i}`);
+						$(`#color-${i}`).css('background-color',this.Colors[this.CurrentColors[i-1]]);
+					}
+				}
+				RefreshTool(){ $(`[name="tool"][value="${this.Mode}"]`).prop('checked',true);}
+			};
+			class LuaFileClass{
+				File;
+				Filename='export.lua';
+				Parts;
+				constructor(){
+					this.Parts=new Array(2).fill(true);
+					this.File =`-- title:   game title
+-- author:  game developer,email,etc.
+-- desc:    short description
+-- site:    website link
+-- license: MIT License (change this to your license of choice)
+-- version: 0.1
+-- script:  lua
+
+t=0
+x=96
+y=24
+
+function TIC()
+
+	if btn(0) then y=y-1 end
+	if btn(1) then y=y+1 end
+	if btn(2) then x=x-1 end
+	if btn(3) then x=x+1 end
+
+	cls(13)
+	spr(1+t%60//30*2,x,y,14,3,0,0,2,2)
+	print("HELLO WORLD!",84,84)
+	t=t+1
+end`;
+				}
+				RefreshFilename(){ $('#filename').val(this.Filename);}
+				RefreshParts(){
+					$('[name="parts"]').each((i,e)=>{
+						let t=$(e);
+						t.prop('checked',this.Parts[parseInt(t.val())]);
+					});
+				}
+			}
+			class PageClass{
+				Ctx=[];
+				OCtx=null;
+				Sprites=[[],[]];
+				Bank=0;
+				SpriteNo=0;
+				OverlayScale=4;
+				GetCtx(){ return this.Ctx[this.Bank];}
+				GetSprite(n){
+					if (Sprite.Size==8){
+						return this.Sprites[this.Bank][n] ?? new SpriteClass(8);
+					} else{
+						let a=[],ratio=Sprite.Size/8;
+						for (let y=0; y<ratio; y++){
+							let row=[];
+							for (let x=0; x<ratio; x++){
+								row.push(
+									this.Sprites[this.Bank][n+x+(y*16)]
+									?? new SpriteClass(8)
+								);
+							}
+							a.push(row);
+						}g
+						return SpriteClass.ToOne(a);
+					}
+				}
+				SetSprite(n,v){
+					if (v.Size==8){
+						this.Sprites[this.Bank][n]=v;
+					} else{
+						let s=v.ToEights();
+						for (let y=0; y<s.length; y++){
+							for (let x=0; x<s[y].length; x++){
+								this.Sprites[this.Bank][n+x+(y*16)]=s[y][x];
+							}
+						}
+					}
+				}
+				GetFlags(p){
+					let v='';
+					for (let i=0; i<256; i++)
+					{
+						let s=this.Sprites[p][i];
+						if (s){ v+=s.Meta;}
+						else{ v+= '00';}
+					}
+					if ((new RegExp('^0*$')).test(v)){ return '';}
+					return v;
+				}
+				RefreshPageNo(){ $(`[name="page"][value="${this.Bank}"]`).prop('checked',true);}
+				SelectPage(){
+					$(this.GetCtx().canvas).show();
+					$(this.Ctx[this.Bank==0 ? 1 : 0].canvas).hide();
+				}
+				GetY(n){ return Math.floor(n/(128/8))*8;}
+				GetX(n){ return (n%(128/8))*8;}
+				GetSpriteNo(x,y){
+					let scale=((8*$('#sprites').width())/128);
+					return Math.floor(y/scale)*(128/8)+Math.floor(x/scale);
+				}
+				SetSpriteNo(n){
+					$('#number').val(n);
+					this.SpriteNo=n;
+					this.RefreshOverlay();
+				}
+				SetSpriteNoXY(x,y){ this.SetSpriteNo(this.GetSpriteNo(x,y));}
+				SetSpriteNoClick(e){ let o=$(e.target).offset(); this.SetSpriteNoXY(e.pageX-o.left,e.pageY-o.top);}
+				GetCanvasImageData(n){ return this.GetCtx().getImageData(this.GetX(n),this.GetY(n),Sprite.Size,Sprite.Size);}
+				GetImageData(n){
+					let s=this.GetSprite(n);
+					if (s.ImageData==null){ s.ImageData=this.GetCanvasImageData(n);	}
+					return s.ImageData;
+				}
+				RefreshOverlay(){
+					let ctx=Page.Octx,
+							scaledSize=128*this.OverlayScale,
+							scaledSpriteSize=Sprite.Size*this.OverlayScale;
+					// Clear the overlay
+					clearCanvas(ctx);
+					// Draw the new highlight box, scaled up
+					ctx.beginPath();
+					ctx.lineWidth=this.OverlayScale;
+					let	x=this.GetX(this.SpriteNo)*this.OverlayScale,
+							y=this.GetY(this.SpriteNo)*this.OverlayScale;
+					ctx.rect(x-1,y-1,scaledSpriteSize+2,scaledSpriteSize+2);
+					ctx.strokeStyle="red";
+					ctx.stroke();
+
+					// Grid
+					let gridColors=['black','grey'];
+					ctx.lineWidth=1;
+					for (let i=1; i<=128/8; i++){
+						let j=8*this.OverlayScale*i;
+						ctx.beginPath();
+						ctx.strokeStyle=gridColors[i%(Sprite.Size/8)==0 ? 0 : 1];
+						ctx.moveTo(j,0);
+						ctx.lineTo(j,scaledSize);
+						ctx.moveTo(0,j);
+						ctx.lineTo(scaledSize,j);
+						ctx.stroke();
+					}
+					ctx.stroke();
+				}
+				Push(){
+					let	imgData=this.GetCtx().createImageData(Sprite.Size,Sprite.Size),
+							s=Sprite.GetString(),
+							k=0;
+
+					for (let i=0; i<imgData.data.length; i+=4){
+						let rgb=Editor.ColorsRgb[parseInt(s.substring(k,k+1),16)]
+						imgData.data[i+0]=rgb[0];
+						imgData.data[i+1]=rgb[1];
+						imgData.data[i+2]=rgb[2];
+						imgData.data[i+3]=255;
+						k++;
+					}
+					this.GetCtx().putImageData(imgData,this.GetX(this.SpriteNo),this.GetY(this.SpriteNo));
+					this.SetSprite(this.SpriteNo,new SpriteClass(Sprite.Size,Sprite,imgData));
+				}
+				Pull(){
+					Sprite=this.GetSprite(this.SpriteNo) ?? new SpriteClass(Sprite.Size)
+					$('#meta').val(Sprite.Meta);
+					Editor.Create();
+				}
+				GetCanvasFullString(n){
+					let	d=this.GetCanvasImageData(this.SpriteNo),
+							s='';
+					for (let i=0; i<d.data.length; i+=4){
+						s += Editor.ColorsRgb.findIndex(c => c[0]==d.data[i] && c[1]==d.data[i+1] && c[2]==d.data[i+2]).toString(16);
+					}
+					return s + '0'.repeat(Sprite.GetMetaSize());
+				}
+				ClearToDefault (i){
+					let ctx=this.Ctx[i];
+					ctx.fillStyle=Editor.Colors[0];
+					ctx.fillRect(0,0,ctx.canvas.width,ctx.canvas.height);
+				}
+			}
+			class AnimatorClass{
+				Ctx=null;
+				Counter=0;
+				Interval=0;
+				AnimationFrames=[];
+				Frames=[];
+				Wait=500;
+				Step(){
+					// Note this will be called by setInterval so "this" will not work
+					let imgData=Page.GetImageData(Animator.AnimationFrames[Animator.Counter]);
+					Animator.Ctx.putImageData(imgData,0,0);
+					Animator.Counter++;
+					if (Animator.Counter==Animator.AnimationFrames.length){ Animator.Counter=0;}
+				}
+				Start(){
+					this.Stop();
+					this.AnimationFrames=this.Frames;
+					this.Wait=parseInt($('#wait').val().trim());
+					$('#panel').attr({ height: Sprite.Size,width: Sprite.Size});
+					if (this.Interval==0){
+						this.Interval=setInterval(this.Step,this.Wait);
+					}
+				}
+				Stop(){
+					if (this.Interval>0){
+						clearInterval(this.Interval);
+						this.Interval=0;
+					}
+				}
+				SetFrames(v){
+					Animator.Frames=v;
+					$('#frames').val(v.join(','));
+				}
+			};
+
+			let Sprite=new SpriteClass(8),
+					Editor=new EditorClass(),
+					LuaFile=new LuaFileClass(),
+					Page=new PageClass(),
+					Animator=new AnimatorClass();
+
+			$(function(){
+				let accordions=$('form').children('fieldset');
+				accordions.wrapInner('<div class="fieldset-content"></div>');
+				accordions.find('> .fieldset-content>legend').each(function(i,e){
+					let t=$(this);
+					t.prependTo(t.parent().parent());
+				});
+				accordions.find('>legend').click(function (){ $(this.parentNode).toggleClass('closed');});
+
+				$('#meta')
+					.change(function (){ Sprite.Meta=$(this).val().trim();})
+					.val(Sprite.Meta);
+				// Generate sprite text and copy it
+				$('button#g').click(() =>{
+					let s=$('#string');
+					s.val(Sprite.GetFullString());
+					s[0].select();
+					document.execCommand('copy');
+					s.val(null);
+				});
+				$('body')[0].addEventListener('paste',e =>{
+					e.preventDefault();
+					let paste=(e.clipboardData || window.clipboardData).getData('text').trim();
+					Sprite=new SpriteClass(paste);
+					$('#size').val(Sprite.Size);
+					$('#meta').val(Sprite.Meta);
+					Editor.Create();
+					Page.RefreshOverlay();
+				});
+				$('button#clear').click(() =>{ if (confirm("Clear the sprite?")){ Sprite=new SpriteClass(Sprite.Size); Editor.Refresh();}});
+				$('[name="tool"]').change(e =>{
+					let i=$(e.target);
+					if (i.is(':checked')){
+						Editor.LastMode=Editor.Mode;
+						Editor.Mode=parseInt(i.val());
+					}
+				});
+				$('[name="page"]').change(function(){
+					let i=$(this);
+					if (i.is(':checked')){
+						Page.Bank=parseInt(i.val());
+						Page.SelectPage();
+					}
+				});
+
+				let spriteAct=(s,m) => $(s).click(() =>{ m(Sprite); Editor.Refresh();});
+				spriteAct('#rotate-left',s => s.RotateLeft());
+				spriteAct('#rotate-right',s => s.RotateRight());
+				spriteAct('#flip-horizontal',s => s.FlipHorizontal());
+				spriteAct('#flip-vertical',s => s.FlipVertical());
+				spriteAct('#mirror-horizontal',s => s.MirrorHorizontal());
+				spriteAct('#mirror-vertical',s => s.MirrorVertical());
+
+				$('#toggleUnderlay').click(() => $('#s').toggleClass('underlay-visible'));
+
+				let underlayNo=(s,e) =>{
+					let p=$(s),
+							number=p.find('input[type="number"]'),
+							control=(c,m,t) =>{
+								let u=Editor.Underlay;
+								c.on(t,function(){
+									let i=$(this);
+									if (!i.is(':invalid')){
+										u[e]=m(u[e],parseInt(i.val()));
+										u.refresh();
+										number.val(u[e]);
+										u.setGui();
+									}
+								});
+							};
+					control(p.find('.plus,.minus'),(z,v) => z+v,'click');
+					control(number,(z,v) => v,'change keyup');
+					Editor.Underlay.controls[e]=number;
+				};
+				underlayNo('#underlayX','x');
+				underlayNo('#underlayY','y');
+				underlayNo('#underlayZoom','zz');
+				underlayNo('#underlayWidth','zx');
+				underlayNo('#underlayHeight','zy');
+				Editor.Underlay.setGui();
+
+				$('[name="color"]').change(e =>{
+					let t=$(e.target);
+					if (t.is(':checked')){ Editor.CurrentColor=parseInt(t.val());}
+				});
+				$('#epply').click(() =>{
+					Sprite=new SpriteClass(parseInt($('#size').val().trim()),Sprite);
+					Editor.Create();
+					$('#meta').val(Sprite.Meta);
+					Page.RefreshOverlay();
+				});
+				Editor.Create();
+
+				Editor.CreatePalette();
+				Editor.RefreshPalette();
+				$('#size').val(Sprite.Size);
+
+				let	overlaySize=128*Page.OverlayScale,overlay=$('#overlay');
+				overlay.attr({ height: overlaySize,width: overlaySize});
+
+				let getCtx=e => e[0].getContext('2d');
+				Editor.UnderlayCtx=getCtx($('#editor-underlay'));
+				Page.Ctx=[ getCtx($('#tiles')),getCtx($('#sprites')) ];
+				Page.Octx=getCtx(overlay);
+				Animator.Ctx=getCtx($('#panel'));
+
+				Page.SelectPage();
+				Page.ClearToDefault(0);
+				Page.ClearToDefault(1);
+
+				$('#push').click(() => Page.Push());
+				$('#pull').click(() => Page.Pull());
+
+				Page.SetSpriteNo(Page.SpriteNo);
+				$('#number').on('change keyup',e =>{
+					let n=$(e.target).val().trim();
+					if (n.length>0){
+						n=parseInt(n);
+						if (n>=0 && n<=255){ Page.SetSpriteNo(n);}
+						else{ $(e.target).val(Page.SpriteNo);}
+					}
+				});
+
+				$('#wait').val(Animator.Wait);
+				$('#animate').click(() => Animator.Start());
+				$('#stop').click(() => Animator.Stop());
+
+				$('#frames').on('change keyup',e => Animator.Frames=$(e.target).val().trim().split(',').filter(f => f).map(f => parseInt(f.trim())));
+
+				let framesButton=(s,f) => $(s).click(() => Animator.SetFrames(f(Animator.Frames)));
+				framesButton('#add-frame',f => f.concat([Page.SpriteNo]));
+				framesButton('#mirror',f => f.concat(f.slice().reverse().slice(1)));
+				framesButton('#double',f => f.map(i => [i,i]).flat());
+				framesButton('#reduce',f => f.filter((i,j,k) => i != k[j+1]));
+
+				$('#overlay').click(e => Page.SetSpriteNoClick(e));
+
+				// lua import
+				$('#upload').change(e =>{
+					// https://stackoverflow.com/a/39515846
+					let reader=new FileReader();
+					reader.onload=e =>{
+						let f=e.target.result;
+
+						if (LuaFile.Parts[1]){
+							LuaFile.File=f.slice();
+						}
+						// Trim file contents to only relevant lines and content
+						// Remove all non-commented lines
+						f=f.replace(/^[^-\n][^-\n].*$/gm,'');
+						// Remove all empty lines
+						f=f.replace(/^\s*[\r\n]/gm,'');
+						// Remove comment prefix
+						f=f.replace(/^-- /gm,'');
+
+						// Function to process a section, line at a time with index
+						let process=(s,a,tag) =>{
+							let	t=tag??['<','>'],
+							l=f.match(new RegExp(`${t[0]}${s}${t[1]}[\n\r]([^]*)[\n\r]${t[0]}\/${s}${t[1]}`,'i'));
+
+							if (l){
+								l=l[1].split(/\r?\n/);
+								if (l){
+									for (let i=0; i<l.length; i++){
+										let p=l[i].match(/(\d+):(.*)/);
+										a(parseInt(p[1]),p[2]);
+									}
+								}
+							}
+						};
+
+						if (LuaFile.Parts[1]){
+							process('palette',(n,v) =>{
+								for (let i=0; i<16; i++){
+									Editor.Colors[i]=`#${v.substr(6*i,6)}`;
+								}
+								Editor.ColorsToRgb();
+							});
+
+							// Reset the pages to the new default bg color
+							for (let i=0; i<2; i++){
+								Page.ClearToDefault(i);
+								Page.Ctx[i].beginPath();
+							}
+
+							let flags=[];
+							process('flags',(n,v) => flags[n]=v);
+
+							// Helper for processing both image sections
+							let images=(t,i) =>{
+								Page.Bank=i;
+								let f=flags && flags[i] ? n => flags[i].substr(n*2,2) : n => '00';
+								process(t,(n,v) =>{
+									Sprite=new SpriteClass(v+f(n));
+									Page.SpriteNo=n;
+									Page.Push();
+								});
+							}
+							images('tiles',0);
+							images('sprites',1);
+
+							Page.Bank=0;
+						}
+
+						if (LuaFile.Parts[0]){
+							process('pixel-80-underlay',(n,v)=>Editor.Underlay.setValues(v),['#','#']);
+							Editor.Underlay.refresh();
+							Editor.Underlay.setGui();
+						}
+
+						if (LuaFile.Parts[1]){
+							// Reset everything in the GUI
+							Page.SelectPage();
+							Page.SpriteNo=0;
+							Page.RefreshOverlay();
+							//Page.Pull();
+							Editor.CreatePalette();
+						}
+					};
+					let file=e.target.files[0];
+					if (file)
+					{
+						LuaFile.Filename=file.name;
+						LuaFile.RefreshFilename();
+						reader.readAsText(file);
+					}
+				});
+				$('#filename').change(function (){ LuaFile.Filename=$(this).val().trim();});
+				LuaFile.RefreshFilename();
+
+				// Lua export
+				$('#download').click(e =>{
+					let f=LuaFile.Parts[1] ? LuaFile.File.slice() : '';
+
+					// Helper functions
+					// Process a section
+					let section=(n,a,tag) =>{
+						let	t=tag??['<','>'],
+								r=new RegExp(`-- ${t[0]}${n}${t[1]}[\n\r]([^]*)[\n\r]-- ${t[0]}\/${n}${t[1]}`,'i');
+						// If there is content for the section
+						let content=false;
+						if (a != null && (a.length>0 || a.size>0)){
+							n=n.toUpperCase();
+							let c=[t[0]+n+t[1]];
+							// Format lines as 001:data
+							a.forEach((e,i) =>{ if (e){ c.push(`${("00" + i).slice(-3)}:${e}`); content=true;}});
+							c.push(t[0]+'/'+n+t[1]);
+							if (content){
+								// Comment lines and combine as string with carriage returns
+								c=c.map(l => '-- '+l).join('\n');
+								// Either replace the existing section or add to the bottom
+								if (r.test(f)){ f=f.replace(r,c);} else{ f+='\n\n'+c;}
+							}
+						}
+						// If the section exists but isn't needed remove it
+						if (!content && r.test(f)){ f=f.replace(r,'');}
+					};
+					// Process an image section
+					let images=(n,p) =>{
+						const m=new Map();
+						Page.Sprites[p].forEach((s,i) => m.set(i,s.GetString()));
+						section(n,m);
+					};
+
+					// Calls to helpers to handle the sections
+
+					if (LuaFile.Parts[1]){
+						section('palette',[Editor.GetPaletteString()]);
+						images('tiles',0);
+						images('sprites',1);
+						section('flags',[Page.GetFlags(0),Page.GetFlags(1)]);
+					}
+
+					if (LuaFile.Parts[0]){
+						section('pixel-80-underlay',[Editor.Underlay.getValues()],['#','#']);
+					}
+
+					// Download the file
+					const file=new File([f],LuaFile.Filename,{ type: "application/x-lua"});
+					var a=$(`<a download="${LuaFile.Filename}" style="display: none;" />`).attr('href',URL.createObjectURL(file))[0];
+					document.body.appendChild(a);
+					a.click();
+					document.body.removeChild(a);
+					URL.revokeObjectURL(a.href);
+				});
+
+				$('#underlay-section input[type="file"]').change(e =>{
+					var img=new Image;
+					img.onload=()=>{
+						$('#editor-underlay').attr({ height: img.height,width: img.width});
+						clearCanvas(Editor.UnderlayCtx);
+						Editor.UnderlayCtx.drawImage(img,0,0);
+						$('#s').addClass('underlay-visible');
+						URL.revokeObjectURL(img.src)
+					}
+					img.src=URL.createObjectURL(e.target.files[0]);
+				});
+
+				$('[name="parts"]').change(function(){
+					let t=$(this);
+					LuaFile.Parts[parseInt(t.val())]=t.is(":checked");
+				});
+				LuaFile.RefreshParts();
+
+				// Open fieldset that was navigated to and highlight its legend
+				$('nav a').click(function (){
+					let a=$($(this).attr('href'));
+					a.removeClass('closed');
+					let l=a.children('legend');
+					l.addClass('highlight');
+					setTimeout(() => l.removeClass('highlight'),500);
+				});
+
+				$('button.hold,fieldset.hold button').each(function(){
+					let interval=0,b=$(this);
+					b.on('touchstart mousedown',()=>{
+						let w=10,c=0;
+						if (interval==0){ interval=setInterval(b=>{
+							if (c>=w){b.trigger('click'); w==0||w--; c=0;}else{c++;}
+						},50,b);}
+					}).on('touchend mouseup',()=>{
+						clearInterval(interval);
+						interval=0;
+					});
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<h1>PIXEL-80</h1>
+		<div class="square" id="editor">
+			<table id="s" class="content"><tbody></tbody></table>
+			<canvas id="editor-underlay" class="content"></canvas>
+			<div id="underlay-background" class="content"></div>
+		</div>
+		<form enctype="multipart/form-data">
+		<fieldset id="editor">
+			<legend>Editor</legend>
+			<fieldset id="colors">
+				<legend>Colors</legend>
+				<table id="p"><tbody></tbody></table>
+				<label id="color-1" class="color"><input type="radio" name="color" value="0" checked></label>
+				<label id="color-2" class="color"><input type="radio" name="color" value="1"></label>
+			</fieldset>
+			<fieldset id="tool">
+				<legend>Tool</legend>
+				<label class="tool"><input type="radio" name="tool" value="0" checked><i class="fa fa-pencil"></i></label>
+				<label class="tool"><input type="radio" name="tool" value="1"><i class="fa fa-eyedropper"></i></label>
+				<label class="tool"><input type="radio" name="tool" value="2"><i class="fa fa-fill"></i></label>
+			</fieldset>
+			<fieldset id="action">
+				<legend>Action</legend>
+				<button type="button" id="rotate-left"><i class="fa fa-rotate-left"></i></button>
+				<button type="button" id="rotate-right"><i class="fa fa-rotate-right"></i></button>
+				<button type="button" id="flip-horizontal"><i class="fa fa-map"></i></button>
+				<button type="button" id="flip-vertical"><i class="fa fa-map fa-rotate-90"></i></button>
+				<button type="button" id="mirror-horizontal"><i class="fa fa-shield-halved"></i></button>
+				<button type="button" id="mirror-vertical"><i class="fa fa-shield-halved fa-rotate-90"></i></button>
+				<button type="button" id="toggleUnderlay"><i class="fa fa-layer-group"></i></button>
+				<button type="button" id="clear"><i class="fa fa-trash-can"></i></button>
+				</fieldset>
+			</fieldset>
+			<nav>
+				<ul>
+					<li><a href="#underlay-section">Underlay</a></li>
+					<li><a href="#import-export-section">Import/Export</a></li>
+					<li><a href="#page-section">Page</a></li>
+					<li><a href="#animation-section">Animation</a></li>
+				</ul>
+			</nav>
+			<fieldset>
+				<legend>Properties</legend>
+				<label for="size">Size</label><input id="size" type="text" inputmode="numeric" pattern="(8|16|32|64)">
+				<button id="apply" type="button"><i class="fa fa-square-check"></i>Apply</button>
+				<label for="meta">Meta</label><input id="meta" type="text">
+			</fieldset>
+			<fieldset id="underlay-section" class="closed">
+				<legend>Underlay</legend>
+				<input type="file" accept="image/*">
+				<fieldset id="underlayX" class="hold">
+					<legend>X</legend>
+					<button type="button" class="minus" value="-1"><i class="fa fa-arrow-left"></i></button>
+					<button type="button" class="plus" value="1"><i class="fa fa-arrow-right"></i></button>
+					<input type="number" min="-100" max="100">
+				</fieldset>
+				<fieldset id="underlayY" class="hold">
+					<legend>Y</legend>
+					<button type="button" class="minus" value="-1"><i class="fa fa-arrow-up"></i></button>
+					<button type="button" class="plus" value="1"><i class="fa fa-arrow-down"></i></button>
+					<input type="number" min="-100" max="100">
+				</fieldset>
+				<fieldset id="underlayZoom" class="hold">
+					<legend>Zoom</legend>
+					<button type="button" class="minus" value="-1"><i class="fa fa-minus"></i></button>
+					<button type="button" class="plus" value="1"><i class="fa fa-plus"></i></button>
+					<input type="number" min="50" max="150">%
+				</fieldset>
+				<fieldset id="underlayWidth" class="hold">
+					<legend>Width</legend>
+					<button type="button" class="minus" value="-1"><i class="fa fa-minus"></i></button>
+					<button type="button" class="plus" value="1"><i class="fa fa-plus"></i></button>
+					<input type="number" min="50" max="150">%
+				</fieldset>
+				<fieldset id="underlayHeight" class="hold">
+					<legend>Height</legend>
+					<button type="button" class="minus" value="-1"><i class="fa fa-minus"></i></button>
+					<button type="button" class="plus" value="1"><i class="fa fa-plus"></i></button>
+					<input type="number" min="50" max="150">%
+				</fieldset>
+			</fieldset>
+			<fieldset class="closed" id="import-export-section">
+				<legend>Import/Export</legend>
+				<label for="string">TIC-80 String</label><input type="text" id="string">
+				<button id="g" type="button"><i class="fa fa-file-export"></i>Generate</button>
+				<label for="upload">Lua Import</label>
+				<input id="upload" type="file">
+				<label for="download">Lua Export</label>
+				<input type="text" id="filename">
+				<button id="download" type="button">Download</button>
+				<fieldset>
+					<legend>Parts</legend>
+					<label class="part"><input type="checkbox" id="underlay-presets" value="0" name="parts"><i class="fa fa-sliders"></i></label><!-- Pixel-80 Underlay Presets -->
+					<!--
+					<label class="part"><input type="checkbox"><i class="fa fa-rectangle-list"></i></label>
+					<label class="part"><input type="checkbox"><i class="fa fa-images"></i></label>
+					<label class="part"><input type="checkbox"><i class="fa fa-palette"></i></label>
+					<label class="part"><input type="checkbox"><i class="fa fa-code"></i></label>
+					<label class="part"><input type="checkbox"><i class="fa fa-map"></i></label>
+					-->
+					<label class="part"><input type="checkbox" id="the-rest" value="1" name="parts"><i class="fa fa-ellipsis"></i></label>
+				</fieldset>
+			</fieldset>
+			<fieldset id="page-section" class="closed">
+				<legend>Page</legend>
+				<fieldset id="noInPage">
+					<legend>Number</legend>
+					<input id="number" type="number">
+					<button id="push" type="button"><i class="fa fa-images"></i>Push</button>
+					<button id="pull" type="button"><i class="fa fa-images"></i>Pull</button>
+					<label><input type="checkbox" id="subselecr">Subselect</label>
+				</fieldset>
+				<fieldset id="pageNo">
+					<legend>Page</legend>
+					<label><input type="radio" name="page" value="0" checked>Tiles</label>
+					<label><input type="radio" name="page" value="1">Sprites</label>
+				</fieldset>
+
+				<div class="square">
+					<canvas id="tiles" width="128" height="128" class="content"></canvas>
+					<canvas id="sprites" width="128" height="128" class="content"></canvas>
+					<canvas id="overlay" width="128" height="128" class="content"></canvas>
+			</div>
+			</fieldset>
+			<fieldset id="animation-section" class="closed">
+				<legend>Animation</legend>
+				<label for="frames">Frames</label><input id="frames" type="text">
+				<button id="add-frame" type="button"><i class="fa fa-plus"></i></button>
+				<button type="button" id="mirror"><i class="fa fa-shield-halved"></i></button>
+				<button type="button" id="double">
+					<span class="fa-stack small">
+						<i class="fa fa-square fa-stack-2x"></i>
+						<i class="fa fa-arrows-left-right fa-stack-1x fa-inverse"></i>
+					</span>
+				</button>
+				<button type="button" id="reduce">
+					<span class="fa-stack small">
+						<i class="fa fa-square fa-stack-2x"></i>
+						<i class="fa fa-arrow-left fa-stack-1x fa-inverse"></i>
+					</span>
+				</button>
+				<br />
+				<button id="animate" type="button"><i class="fa fa-play"></i></button>
+				<button id="stop" type="button"><i class="fa fa-stop"></i></button>
+				<label for="wait">Wait</label><input id="wait" type="text">
+				<div class="square">
+					<canvas id="panel" width="8" height="8" class=content></canvas>
+				</div>
+			</fieldset>
+		</form>
+	</body>
+</html>
