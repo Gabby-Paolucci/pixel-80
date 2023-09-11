@@ -875,7 +875,7 @@ end`;
 					let t=$(e.target);
 					if (t.is(':checked')){ Editor.CurrentColor=parseInt(t.val());}
 				});
-				$('#epply').click(() =>{
+				$('#apply').click(() =>{
 					Sprite=new SpriteClass(parseInt($('#size').val().trim()),Sprite);
 					Editor.Create();
 					$('#meta').val(Sprite.Meta);
