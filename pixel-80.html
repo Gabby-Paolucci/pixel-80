@@ -266,6 +266,23 @@
 			#underlayZoom{
 				clear: both;
 			}
+			#color-names{
+				float: left;
+			}
+			#color-name-1,#color-name-2{
+				display: inline-block;
+				width: 8em;
+				border: solid;
+			}
+			#color-names b{
+				display: inline-block;
+				background: black;
+				color: white;
+				padding: 2px;
+			}
+			#color-name-1 span,#color-name-2 span{
+				padding-left: 0.25em;
+			}
 		</style>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/4.1.3/less.min.js" integrity="sha512-6gUGqd/zBCrEKbJqPI7iINc61jlOfH5A+SluY15IkNO1o4qP1DEYjQBewTB4l0U4ihXZdupg8Mb77VxqE+37dg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script>
@@ -449,6 +466,7 @@
 				// Default SWEETIE 16 palette
 				Colors=['#1a1c2c','#5d275d','#b13e53','#ef7d57','#ffcd75','#a7f070','#38b764','#257179','#29366f','#3b5dc9','#41a6f6','#73eff7','#f4f4f4','#94b0c2','#566c86','#333c57'];
 				ColorsRgb=[];
+				ColorNames=['Black','Purple','Red','Orange','Yellow','Light Green','Green','Dark Green','Dark Blue','Blue','Light Blue','Cyan','White','Light Grey','Grey','Dark Grey'];
 				CurrentColors=[1,0];
 				CurrentColor=0;
 				Mode=0;
@@ -568,6 +586,7 @@
 						$(`table#p tbody td.selected${i}`).removeClass(`selected${i}`);
 						$('table#p tbody td').eq(this.CurrentColors[i-1]).addClass(`selected${i}`);
 						$(`#color-${i}`).css('background-color',this.Colors[this.CurrentColors[i-1]]);
+						$(`#color-name-${i} span`).html(this.ColorNames[this.CurrentColors[i-1]]);	
 					}
 				}
 				RefreshTool(){ $(`[name="tool"][value="${this.Mode}"]`).prop('checked',true);}
@@ -1133,6 +1152,10 @@ end`;
 				<table id="p"><tbody></tbody></table>
 				<label id="color-1" class="color"><input type="radio" name="color" value="0" checked></label>
 				<label id="color-2" class="color"><input type="radio" name="color" value="1"></label>
+				<div id="color-names">	
+					<span id="color-name-1"><b>FG</b><span></span></span>
+					<span id="color-name-2"><b>BG</b><span></span></span>
+				</div>
 			</fieldset>
 			<fieldset id="tool">
 				<legend>Tool</legend>
