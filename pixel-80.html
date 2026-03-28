@@ -47,6 +47,9 @@
 				border: solid 1px;
 				border-collapse: collapse;
 			}
+			table.noGrid, table.noGrid tr, table.noGrid td {
+				border: none;
+			}
 			td{
 				width: 1em;
 				height: 1em;
@@ -168,11 +171,11 @@
 				border: 1px solid;
 				padding: 0.25em;
 			}
-			#action button{
+			#action button, #view button{
 				padding: 0.5em;
 				margin-right: 0.5em;
 			}
-			#action button .fa, #animation-section button .fa{
+			#action button .fa, #animation-section button .fa, #view button .fa{
 				margin-right: 0;
 			}
 			#tiles, #sprites, #panel{
@@ -864,6 +867,8 @@ end`;
 
 				$('#toggleUnderlay').click(() => $('#s').toggleClass('underlay-visible'));
 
+				$('#toggleGrid').click(() => $('#s').toggleClass('noGrid'));
+
 				let underlayNo=(s,e) =>{
 					let p=$(s),
 							number=p.find('input[type="number"]'),
@@ -894,7 +899,7 @@ end`;
 					let t=$(e.target);
 					if (t.is(':checked')){ Editor.CurrentColor=parseInt(t.val());}
 				});
-				$('#apply').click(() =>{
+				$('#epply').click(() =>{
 					Sprite=new SpriteClass(parseInt($('#size').val().trim()),Sprite);
 					Editor.Create();
 					$('#meta').val(Sprite.Meta);
@@ -1167,12 +1172,16 @@ end`;
 				<legend>Action</legend>
 				<button type="button" id="rotate-left"><i class="fa fa-rotate-left"></i></button>
 				<button type="button" id="rotate-right"><i class="fa fa-rotate-right"></i></button>
-				<button type="button" id="flip-horizontal"><i class="fa fa-map"></i></button>
-				<button type="button" id="flip-vertical"><i class="fa fa-map fa-rotate-90"></i></button>
+				<button type="button" id="flip-horizontal"><i class="fa fa-arrow-right-arrow-left"></i></button>
+				<button type="button" id="flip-vertical"><i class="fa fa-arrow-right-arrow-left fa-rotate-90"></i></button>
 				<button type="button" id="mirror-horizontal"><i class="fa fa-shield-halved"></i></button>
 				<button type="button" id="mirror-vertical"><i class="fa fa-shield-halved fa-rotate-90"></i></button>
-				<button type="button" id="toggleUnderlay"><i class="fa fa-layer-group"></i></button>
 				<button type="button" id="clear"><i class="fa fa-trash-can"></i></button>
+				</fieldset>
+			<fieldset id="view">
+				<legend>View</legend>
+				<button type="button" id="toggleUnderlay"><i class="fa fa-layer-group"></i></button>
+				<button type="button" id="toggleGrid"><i class="fa fa-table-cells-large"></i></button>
 				</fieldset>
 			</fieldset>
 			<nav>
